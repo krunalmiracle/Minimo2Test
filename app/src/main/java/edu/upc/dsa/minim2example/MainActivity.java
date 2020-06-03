@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -15,10 +14,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.List;
@@ -58,6 +54,10 @@ public class MainActivity extends AppCompatActivity {
         setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        progressBar = findViewById(R.id.progressBar);
+        //RecyclerView is in Build but where is the setUp of layoutManager
+        layoutManager = new LinearLayoutManager(this);
+        // progressBar.setVisibility(View.VISIBLE);
         //After launch check if a user exists in preferences and also set the player
         if(!ExistUserLogged()){
             LaunchLoginActivity();
@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
         //Remember when using Local host on windows the IP is 10.0.2.2 for Android
         //Also added NullOnEmptyConverterFactory when the response from server is empty
         retrofit = new Retrofit.Builder()
-                .baseUrl("https://do.diba.cat/api/dataset/museus/format/json/pag-ini/1/pag-fi/15")
+                .baseUrl("https://do.diba.cat/api/dataset/museus/format/")
                 .addConverterFactory(new NullOnEmptyConverterFactory())
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(client)
@@ -110,6 +110,10 @@ public class MainActivity extends AppCompatActivity {
                     if (response.isSuccessful()) {
                         Museums museums = response.body();
                         elementList=museums.getElements();
+                        for(int k =0;k<elementList.size();k++){
+                            Log.w("getMuseums","Elements Nom: "+ elementList.get(k).getAdrecaNom());//Changed Explain
+                        }
+                        Log.w("getMuseums","Elements Size: "+ elementList.size());
                         //If clicked once then new player list else update the recyclerview
                         if(mAdapter == null){
                             buildRecyclerView();
@@ -117,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
                             mAdapter = null;
                             buildRecyclerView();
                         }
+                        progressBar.setVisibility(View.GONE);
                     } else {
                         // empty response...
                         Log.d("MuseumsList","Request Failed!");
@@ -147,15 +152,16 @@ public class MainActivity extends AppCompatActivity {
         mAdapter.SetOnItemClickListener(new MyAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
-                LaunchMusumDetailActivity(elementList.get(position));
+                LaunchMuseumDetailActivity(elementList.get(position));
             }
         });
     }
     private boolean ExistUserLogged(){
         //Access the shared preference UserInfo and obtain the parameters, default =string empty
         SharedPreferences settings = getSharedPreferences("UserInfo", 0);
-        user.setUsername(settings.getString("Username", ""));
-        user.setPassword(settings.getString("Password", ""));
+        user.setUsername(settings.getString("Username", ""));//Changed Explain!!
+        user.setPassword(settings.getString("Password", ""));//Changed Explain!!
+        Log.w("MainActivity Exist User","User Exists? "+!user.getUsername().equals("") );//Changed Explain!!
         return !user.getUsername().equals("");
     }
     //User Notifier Handler using Toast
@@ -163,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
         Toast toast = Toast.makeText(MainActivity.this,MSG,Toast.LENGTH_SHORT);
         toast.show();
     }
-    private void LaunchMusumDetailActivity(Element museum) {
+    private void LaunchMuseumDetailActivity(Element museum) {
         Intent intent = new Intent(MainActivity.this ,MuseumDetailActivity.class);
         intent.putExtra("Museum", (Parcelable) museum);
         startActivityForResult(intent,2);

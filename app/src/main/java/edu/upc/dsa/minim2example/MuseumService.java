@@ -6,6 +6,6 @@ import retrofit2.http.GET;
 
 public interface MuseumService {
     //GET the list of Museums
-    @GET()
+    @GET("json/pag-ini/1/pag-fi/15")
     Call<Museums> getMuseums();
 }

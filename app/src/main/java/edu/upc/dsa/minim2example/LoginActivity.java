@@ -33,16 +33,12 @@ public class LoginActivity extends AppCompatActivity{
         username= (EditText) findViewById(R.id.editUsername);
         password= (EditText) findViewById(R.id.editPassword);
 
-        preferences =  LoginActivity.this.getPreferences(Context.MODE_PRIVATE);
+        preferences = getSharedPreferences("UserInfo", 0);
+        editor = preferences.edit();
 
         String user = preferences.getString("user","incorrect");
         String password = preferences.getString("dsamola","incorrect");
 
-        if(user.equals("user")&&password.equals("dsamola"))
-        {
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            startActivity(intent);
-        }
     }
 
     //User Notifier Handler using Toast
@@ -57,12 +53,12 @@ public class LoginActivity extends AppCompatActivity{
 
         if (name.equals("user") && pass.equals("dsamola")) {
 
-            SharedPreferences sharedPref = LoginActivity.this.getPreferences(Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putString(username.getText().toString(), username.getText().toString());
-            editor.putString(password.getText().toString(), password.getText().toString());
+            SharedPreferences settings = getSharedPreferences("UserInfo", 0);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString("Username", name);//Changed Explain!!
+            editor.putString("Password", pass);//Changed Explain!!
             editor.commit();
-
+            user = new User(name,pass);
             Intent returnIntent = new Intent();
             returnIntent.putExtra("User",user);
             setResult(Activity.RESULT_OK,returnIntent);
